@@ -18,10 +18,10 @@ props = parse_properties(props_path)
 
 class Failure:
 
-    def __init__(self, errors):
+    def __init__(self):
         self.errors = []
 
-    def add_msg(self, code, text, params, detail):
+    def add_msg(self, code, text, params=[], detail=""):
         assert code in props
         msg_dict = {
             "code":code,
@@ -33,6 +33,34 @@ class Failure:
 
     def as_json(self):
         return json.dumps({"failure":{"errors": self.errors}})
+
+
+class RequestInvalid(Failure):
+
+    def __init__(self, params=[], detail=""):
+        super().__init__()
+        code = 'elg.request.invalid'
+        msg_dict = {
+            "code": code,
+            "text": props[code],
+            "params": params,
+            "detail": detail
+        }
+        self.errors.append(msg_dict)
+
+
+class RequestTypeUnsupport(Failure):
+
+    def __init__(self, req_type, params=[], detail=""):
+        super().__init__()
+        code = 'elg.request.type.unsupported'
+        msg_dict = {
+            "code": code,
+            "text": props[code].format(req_type),
+            "params": params,
+            "detail": detail
+        }
+        self.errors.append(msg_dict)
 
 
 class Response:
@@ -52,6 +80,7 @@ class Response:
             "detail": detail
         }
         self.warnings.append(msg_dict)
+
 
 
 class AnnotationsResponse(Response):
@@ -75,9 +104,8 @@ class AnnotationsResponse(Response):
 
 class ClassificationResponse(Response):
 
-    def __init__(self, type, classes):
-        super(ClassificationResponse, self).__init__(type)
-        assert type == 'classification'
+    def __init__(self, classes):
+        super(ClassificationResponse, self).__init__('classification')
         self.classes = classes
 
     def as_json(self):
