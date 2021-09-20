@@ -76,6 +76,31 @@ class RequestTooLarge(Failure):
         }
         self.errors.append(msg_dict)
 
+class AudioRequestUnsupportedAudioFormat(Failure):
+    def __init__(self, audio_format, params=[], detail=""):
+        super().__init__()
+        code = 'elg.request.audio.format.unsupported'
+        msg_dict = {
+        "code": code,
+        "text": props[code].format(audio_format),
+        "params": params,
+        "detail": detail
+        }
+        self.errors.append(msg_dict)
+
+
+class AudioRequestUnsupportedSampleRate(Failure):
+    def __init__(self, sample_rate,params=[], detail=""):
+        super().__init__()
+        code = 'elg.request.audio.sampleRate.unsupported'
+        msg_dict = {
+        "code": code,
+        "text": props[code].format(sample_rate),
+        "params": params,
+        "detail": detail
+        }
+        self.errors.append(msg_dict)
+
 
 class Response:
 
