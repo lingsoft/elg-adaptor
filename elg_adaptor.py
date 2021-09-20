@@ -24,7 +24,7 @@ class Failure:
     def add_msg(self, code, text, params=[], detail=""):
         assert code in props
         msg_dict = {
-            "code":code,
+            "code": code,
             "text": text,
             "params": params,
             "detail": detail
@@ -32,7 +32,7 @@ class Failure:
         self.errors.append(msg_dict)
 
     def as_json(self):
-        return json.dumps({"failure":{"errors": self.errors}})
+        return json.dumps({"failure": {"errors": self.errors}})
 
 
 class RequestInvalid(Failure):
@@ -63,6 +63,20 @@ class RequestTypeUnsupport(Failure):
         self.errors.append(msg_dict)
 
 
+class RequestTooLarge(Failure):
+
+    def __init__(self, params=[], detail=""):
+        super().__init__()
+        code = 'elg.request.too.large'
+        msg_dict = {
+            "code": code,
+            "text": props[code],
+            "params": params,
+            "detail": detail
+        }
+        self.errors.append(msg_dict)
+
+
 class Response:
 
     def __init__(self, type):
@@ -74,13 +88,12 @@ class Response:
     def add_msg(self, code, text, params, detail):
         assert code in props
         msg_dict = {
-            "code":code,
+            "code": code,
             "text": text,
             "params": params,
             "detail": detail
         }
         self.warnings.append(msg_dict)
-
 
 
 class AnnotationsResponse(Response):
@@ -97,9 +110,9 @@ class AnnotationsResponse(Response):
     def as_json(self):
         return json.dumps({"response":
                                {"type": self.type,
-                                "warnings":self.warnings,
+                                "warnings": self.warnings,
                                 "features": self.features,
-                                "annotations":self.annotations}})
+                                "annotations": self.annotations}})
 
 
 class ClassificationResponse(Response):
@@ -111,8 +124,8 @@ class ClassificationResponse(Response):
     def as_json(self):
         return json.dumps({"response":
                                {"type": self.type,
-                                "warnings":self.warnings,
-                                "classes":self.classes}})
+                                "warnings": self.warnings,
+                                "classes": self.classes}})
 
 
 class TextResponse(Response):
@@ -125,8 +138,8 @@ class TextResponse(Response):
     def as_json(self):
         return json.dumps({"response":
                                {"type": self.type,
-                                "warnings":self.warnings,
-                                "texts":self.texts}})
+                                "warnings": self.warnings,
+                                "texts": self.texts}})
 
 
 class AudioResponse(Response):
