@@ -35,6 +35,20 @@ class Failure:
         return json.dumps({"failure": {"errors": self.errors}})
 
 
+class RequestMissing(Failure):
+
+    def __init__(self, params=[], detail=""):
+        super().__init__()
+        code = 'elg.request.missing'
+        msg_dict = {
+            "code": code,
+            "text": props[code],
+            "params": params,
+            "detail": detail
+        }
+        self.errors.append(msg_dict)
+
+
 class RequestInvalid(Failure):
 
     def __init__(self, params=[], detail=""):
@@ -76,6 +90,7 @@ class RequestTooLarge(Failure):
         }
         self.errors.append(msg_dict)
 
+
 class AudioRequestUnsupportedAudioFormat(Failure):
     def __init__(self, audio_format, params=[], detail=""):
         super().__init__()
@@ -105,8 +120,8 @@ class AudioRequestUnsupportedSampleRate(Failure):
 class Response:
 
     def __init__(self, type):
-        type_list = ['classification', 'text', 'annotations', 'audio']
-        assert type in type_list
+        type_list = ['classification', 'texts', 'annotations', 'audio']
+        assert type in type_list, "Type %s not in the type list"%type
         self.type = type
         self.warnings = []
 
@@ -123,9 +138,8 @@ class Response:
 
 class AnnotationsResponse(Response):
 
-    def __init__(self, type, features={}):
-        super(AnnotationsResponse, self).__init__(type)
-        assert type == 'annotations'
+    def __init__(self, features={}):
+        super(AnnotationsResponse, self).__init__('annotations')
         self.annotations = {}
         self.features = features
 
@@ -155,9 +169,8 @@ class ClassificationResponse(Response):
 
 class TextResponse(Response):
 
-    def __init__(self, type, texts):
-        super(TextResponse, self).__init__(type)
-        assert type == 'texts'
+    def __init__(self, texts):
+        super(TextResponse, self).__init__('texts')
         self.texts = texts
 
     def as_json(self):
