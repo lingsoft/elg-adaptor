@@ -1,4 +1,5 @@
 import json
+from elg.model import StatusMessage
 
 
 def parse_properties(props_path):
@@ -16,190 +17,31 @@ props_path = 'elg-messages_en.properties'
 props = parse_properties(props_path)
 
 
-class Failure:
+class RequestInvalid:
 
-    def __init__(self):
-        self.errors = []
-
-    def add_msg(self, code, text, params=[], detail=""):
-        assert code in props
-        msg_dict = {
-            "code": code,
-            "text": text,
-            "params": params,
-            "detail": detail
-        }
-        self.errors.append(msg_dict)
-
-    def as_json(self):
-        return json.dumps({"failure": {"errors": self.errors}})
-
-
-class RequestMissing(Failure):
-
-    def __init__(self, params=[], detail=""):
-        super().__init__()
-        code = 'elg.request.missing'
-        msg_dict = {
-            "code": code,
-            "text": props[code],
-            "params": params,
-            "detail": detail
-        }
-        self.errors.append(msg_dict)
-
-
-class RequestInvalid(Failure):
-
-    def __init__(self, params=[], detail=""):
-        super().__init__()
+    def __init__(self, detail=""):
         code = 'elg.request.invalid'
-        msg_dict = {
+        self.data = {
             "code": code,
             "text": props[code],
-            "params": params,
-            "detail": detail
+            "params": [],
+            'detail': {"msg":detail}
         }
-        self.errors.append(msg_dict)
+
+    def as_status(self):
+        return StatusMessage(**self.data)
 
 
-class RequestTypeUnsupport(Failure):
+class RequestTooLarge:
 
-    def __init__(self, req_type, params=[], detail=""):
-        super().__init__()
-        code = 'elg.request.type.unsupported'
-        msg_dict = {
-            "code": code,
-            "text": props[code].format(req_type),
-            "params": params,
-            "detail": detail
-        }
-        self.errors.append(msg_dict)
-
-
-class RequestTooLarge(Failure):
-
-    def __init__(self, params=[], detail=""):
-        super().__init__()
+    def __init__(self, detail=""):
         code = 'elg.request.too.large'
-        msg_dict = {
-            "code": code,
-            "text": props[code],
-            "params": params,
-            "detail": detail
+        self.data = {
+                'code':code,
+                'params': [],
+                'text': props[code],
+                'detail': {"msg":detail}
         }
-        self.errors.append(msg_dict)
 
-
-class AudioRequestUnsupportedAudioFormat(Failure):
-    def __init__(self, audio_format, params=[], detail=""):
-        super().__init__()
-        code = 'elg.request.audio.format.unsupported'
-        msg_dict = {
-        "code": code,
-        "text": props[code].format(audio_format),
-        "params": params,
-        "detail": detail
-        }
-        self.errors.append(msg_dict)
-
-
-class AudioRequestUnsupportedSampleRate(Failure):
-    def __init__(self, sample_rate,params=[], detail=""):
-        super().__init__()
-        code = 'elg.request.audio.sampleRate.unsupported'
-        msg_dict = {
-        "code": code,
-        "text": props[code].format(sample_rate),
-        "params": params,
-        "detail": detail
-        }
-        self.errors.append(msg_dict)
-
-
-class Response:
-
-    def __init__(self, type):
-        type_list = ['classification', 'texts', 'annotations', 'audio']
-        assert type in type_list, "Type %s not in the type list"%type
-        self.type = type
-        self.warnings = []
-
-    def add_msg(self, code, text, params, detail):
-        assert code in props
-        msg_dict = {
-            "code": code,
-            "text": text,
-            "params": params,
-            "detail": detail
-        }
-        self.warnings.append(msg_dict)
-
-
-class AnnotationsResponse(Response):
-
-    def __init__(self, features={}):
-        super(AnnotationsResponse, self).__init__('annotations')
-        self.annotations = {}
-        self.features = features
-
-    def add_annotations(self, anno_type, res):
-        self.annotations[anno_type] = res
-
-    def as_json(self):
-        return json.dumps({"response":
-                               {"type": self.type,
-                                "warnings": self.warnings,
-                                "features": self.features,
-                                "annotations": self.annotations}})
-
-
-class ClassificationResponse(Response):
-
-    def __init__(self, classes):
-        super(ClassificationResponse, self).__init__('classification')
-        self.classes = classes
-
-    def as_json(self):
-        return json.dumps({"response":
-                               {"type": self.type,
-                                "warnings": self.warnings,
-                                "classes": self.classes}})
-
-
-class TextResponse(Response):
-
-    def __init__(self, texts):
-        super(TextResponse, self).__init__('texts')
-        self.texts = texts
-
-    def as_json(self):
-        return json.dumps({"response":
-                               {"type": self.type,
-                                "warnings": self.warnings,
-                                "texts": self.texts}})
-
-
-class AudioResponse(Response):
-
-    def __init__(self, type, content):
-        super(AudioResponse, self).__init__(type)
-        assert type == 'audio'
-        # base64 encoded audio
-        self.content = content
-        self.annotations = {}
-
-    def add_annotations(self, anno_type, res):
-        self.annotations[anno_type] = res
-
-    def as_json(self):
-        return json.dumps({"response":
-                               {"type": self.type,
-                                "warnings": self.warnings,
-                                "format": "string",
-                                "annotations": self.annotations,
-                                "content": self.content}})
-
-
-
-
+    def as_status(self):
+        return StatusMessage(**self.data)
