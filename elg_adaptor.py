@@ -45,3 +45,18 @@ class RequestTooLarge:
 
     def as_status(self):
         return StatusMessage(**self.data)
+
+
+class InternalError:
+
+    def __init__(self, param):
+        code = 'elg.service.internalError'
+        self.data = {
+                'code':code,
+                'params': [param],
+                'text': props[code],
+                'detail': None
+        }
+
+    def as_status(self):
+        return StatusMessage(**self.data)
