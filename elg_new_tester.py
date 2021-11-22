@@ -1,8 +1,6 @@
 from elg.model import TextRequest, StructuredTextRequest, AudioRequest
-from elg.model import TextsResponse, AnnotationsResponse, ClassificationResponse, AudioResponse
 from elg.model.request.StructuredTextRequest import Text
 
-import json
 import copy
 import requests
 import unittest
@@ -15,10 +13,12 @@ headers = {"Content-Type": "application/json; charset=utf-8"}
 # Request
 params = {"pipe": "smegram"}
 
-text_req = TextRequest(content="This is a test", params=params)
-struct_req = StructuredTextRequest(texts=[Text(content='This is a text.')]*2, params=params)
-audio_req = None
+text_content = "This is a test."
+text_req = TextRequest(content=text_content, params=params)
+struct_req = StructuredTextRequest(texts=[Text(content=text_content)]*2, params=params)
 
+audio_content = open('test.wav', 'rb').read()
+audio_req = AudioRequest(content=audio_content, params=params, format="LINEAR16")
 
 request = struct_req
 response_type = 'texts'
@@ -32,7 +32,7 @@ class TestELG(unittest.TestCase):
         res = res.json()
         assert 'response' in res
         assert res['response']['type'] == response_type
-        print(res)
+        # print(res)
 
     def test_emp_req(self):
         empty_req = copy.deepcopy(request)
@@ -47,10 +47,22 @@ class TestELG(unittest.TestCase):
         assert res is not None
         res = res.json()
         assert 'response' or 'failure' in res
-        print(res)
+        # print(res)
 
-    def val_lar_req_test(self):
-        res = requests.post(url, headers=headers, json=request.dict()).json()
+    def test_lar_req(self):
+        large_req = copy.deepcopy(request)
+        large_text = " ".join([text_content]*10000)
+        if isinstance(large_req, TextRequest):
+            large_req.content = large_text
+        elif isinstance(large_req, AudioRequest):
+            large_audio = b"".join([audio_content]*100)
+            large_req.content = large_audio
+        elif isinstance(large_req, StructuredTextRequest):
+            large_req.texts=[Text(content=large_text)] * 2
+        res = requests.post(url, headers=headers, json=large_req.dict())
+        assert res is not None
+        res = res.json()
+        assert 'response' or 'failure' in res
 
     def test_inv_param(self):
         inv_req = copy.deepcopy(request)
@@ -58,18 +70,20 @@ class TestELG(unittest.TestCase):
         for k in inv_params:
             inv_params[k] = 'inv'
         inv_req.params = inv_params
-
         res = requests.post(url, headers=headers, json=inv_req.dict())
         assert res is not None, "The server returned None"
         res = res.json()
         assert 'failure' in res
-        print(res)
+        # print(res)
 
-    def inv_req_schema_test(self):
-        res = requests.post(url, headers=headers, json=request.dict()).json()
-
-    def load_test(self):
-        res = requests.post(url, headers=headers, json=request.dict()).json()
+    def test_inv_schema(self):
+        request_dict = request.dict()
+        request_dict.pop('type')
+        res = requests.post(url, headers=headers, json=request_dict)
+        assert res is not None, "The server returned None"
+        res = res.json()
+        assert 'failure' in res
+        # print(res)
 
 
 
