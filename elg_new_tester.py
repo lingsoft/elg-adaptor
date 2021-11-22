@@ -3,16 +3,17 @@ from elg.model.request.StructuredTextRequest import Text
 
 import time
 import copy
+import threading
 import requests
 import unittest
 
 # Configuration
-port = 8181
-url = 'http://localhost:%d/process' % port
+port = 8080
+url = 'http://localhost:%d/processText/service'%port
 headers = {"Content-Type": "application/json; charset=utf-8"}
 
 # Request
-params = {"pipe": "smegram"}
+params = None
 
 text_content = "This is a test."
 text_req = TextRequest(content=text_content, params=params)
@@ -21,8 +22,8 @@ struct_req = StructuredTextRequest(texts=[Text(content=text_content)]*2, params=
 audio_content = open('test.wav', 'rb').read()
 audio_req = AudioRequest(content=audio_content, params=params, format="LINEAR16")
 
-request = struct_req
-response_type = 'texts'
+request = text_req
+response_type = 'annotations'
 
 
 class TestELG(unittest.TestCase):
@@ -37,10 +38,10 @@ class TestELG(unittest.TestCase):
 
     def test_resp_time(self):
         st = time.time()
-        for i in range(20):
+        for i in range(10):
             requests.post(url, headers=headers, json=request.dict())
         et = time.time()
-        print("Average response time: %.2f"%((et-st)/20))
+        print("Average response time: %.2fs"%((et-st)/20))
 
     def test_emp_req(self):
         empty_req = copy.deepcopy(request)
@@ -54,7 +55,7 @@ class TestELG(unittest.TestCase):
         res = requests.post(url, headers=headers, json=empty_req.dict())
         assert res is not None
         res = res.json()
-        assert 'response' or 'failure' in res
+        assert 'response' or 'failure' or 'error' in res
         # print(res)
 
     def test_lar_req(self):
@@ -70,10 +71,11 @@ class TestELG(unittest.TestCase):
         res = requests.post(url, headers=headers, json=large_req.dict())
         assert res is not None
         res = res.json()
-        assert 'response' or 'failure' in res
+        assert 'response' or 'failure' or 'error' in res
 
     def test_inv_param(self):
         inv_req = copy.deepcopy(request)
+        if not params: return
         inv_params = copy.deepcopy(params)
         for k in inv_params:
             inv_params[k] = 'inv'
@@ -81,7 +83,7 @@ class TestELG(unittest.TestCase):
         res = requests.post(url, headers=headers, json=inv_req.dict())
         assert res is not None, "The server returned None"
         res = res.json()
-        assert 'failure' in res
+        assert 'failure' or 'error' in res
         # print(res)
 
     def test_inv_schema(self):
@@ -90,8 +92,30 @@ class TestELG(unittest.TestCase):
         res = requests.post(url, headers=headers, json=request_dict)
         assert res is not None, "The server returned None"
         res = res.json()
-        assert 'failure' in res
+        assert 'failure' or 'error' in res
         # print(res)
 
+    def test_load(self):
+        class ReqThread(threading.Thread):
+            def __init__(self, url, headers, data, times):
+                super().__init__()
+                self.url = url
+                self.headers = headers
+                self.data = data
+                self.times = times
 
+            def run(self) -> None:
+                for i in range(self.times):
+                    requests.post(self.url, headers=self.headers, json=self.data)
+        t_num = 50
+        times = 5
+        t_list = []
+        for i in range(t_num):
+            t_list.append(ReqThread(url, headers, request.dict(), times))
+            t_list[i].start()
 
+        st = time.time()
+        for t in t_list:
+            t.join()
+        et = time.time()
+        print("Average response time: %.2fs"%((et-st)/(t_num*times)))
