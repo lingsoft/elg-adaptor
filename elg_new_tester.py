@@ -1,6 +1,7 @@
 from elg.model import TextRequest, StructuredTextRequest, AudioRequest
 from elg.model.request.StructuredTextRequest import Text
 
+import time
 import copy
 import requests
 import unittest
@@ -33,6 +34,13 @@ class TestELG(unittest.TestCase):
         assert 'response' in res
         assert res['response']['type'] == response_type
         # print(res)
+
+    def test_resp_time(self):
+        st = time.time()
+        for i in range(20):
+            requests.post(url, headers=headers, json=request.dict())
+        et = time.time()
+        print("Average response time: %.2f"%((et-st)/20))
 
     def test_emp_req(self):
         empty_req = copy.deepcopy(request)
