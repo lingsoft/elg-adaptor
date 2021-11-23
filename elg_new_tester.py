@@ -9,12 +9,12 @@ import requests
 import unittest
 
 # Configuration
-port = 8080
-url = 'http://localhost:%d/processText/service'%port
+port = 8181
+url = 'http://localhost:%d/process'%port
 headers = {"Content-Type": "application/json; charset=utf-8"}
 
 # Request
-params = None
+params = {'pipe': 'smegram'}
 
 text_content = "This is a test."
 text_req = TextRequest(content=text_content, params=params)
@@ -26,7 +26,7 @@ audio_req = AudioRequest(content=audio_content, params=params, format="LINEAR16"
 # Specify your request and response type
 request = text_req
 resp_typs = ['annotations', 'audio', 'classification', 'texts']
-response_type = 'annotations'
+response_type = 'texts'
 
 
 class TestELG(unittest.TestCase):
@@ -34,6 +34,7 @@ class TestELG(unittest.TestCase):
     def test_res_type(self):
         res = requests.post(url, headers=headers, json=request.dict())
         assert res is not None
+        assert res.status_code == 200
         res = res.json()
         assert 'response' in res
         assert res['response']['type'] == response_type
@@ -44,7 +45,7 @@ class TestELG(unittest.TestCase):
         for i in range(10):
             requests.post(url, headers=headers, json=request.dict())
         et = time.time()
-        print("Average response time: %.2fs"%((et-st)/20))
+        print("Average response time: %.2fs"%((et-st)/10))
 
     def test_emp_req(self):
         empty_req = copy.deepcopy(request)
@@ -57,6 +58,7 @@ class TestELG(unittest.TestCase):
 
         res = requests.post(url, headers=headers, json=empty_req.dict())
         assert res is not None
+        assert res.status_code == 200
         res = res.json()
         assert 'response' or 'failure' or 'error' in res
         # print(res)
@@ -73,6 +75,7 @@ class TestELG(unittest.TestCase):
             large_req.texts=[Text(content=large_text)] * 2
         res = requests.post(url, headers=headers, json=large_req.dict())
         assert res is not None
+        assert res.status_code == 200
         res = res.json()
         assert 'response' or 'failure' or 'error' in res
 
@@ -85,6 +88,7 @@ class TestELG(unittest.TestCase):
         inv_req.params = inv_params
         res = requests.post(url, headers=headers, json=inv_req.dict())
         assert res is not None, "The server returned None"
+        assert res.status_code == 200
         res = res.json()
         assert 'failure' or 'error' in res
         # print(res)
@@ -94,6 +98,7 @@ class TestELG(unittest.TestCase):
         request_dict.pop('type')
         res = requests.post(url, headers=headers, json=request_dict)
         assert res is not None, "The server returned None"
+        assert res.status_code == 200
         res = res.json()
         assert 'failure' or 'error' in res
         # print(res)
@@ -110,8 +115,8 @@ class TestELG(unittest.TestCase):
             def run(self) -> None:
                 for i in range(self.times):
                     requests.post(self.url, headers=self.headers, json=self.data)
-        t_num = 50
-        times = 5
+        t_num = 10
+        times = 3
         t_list = []
         for i in range(t_num):
             t_list.append(ReqThread(url, headers, request.dict(), times))
