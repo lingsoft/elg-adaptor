@@ -1,5 +1,6 @@
 from elg.model import TextRequest, StructuredTextRequest, AudioRequest
 from elg.model.request.StructuredTextRequest import Text
+from elg.model import response
 
 import time
 import copy
@@ -22,7 +23,9 @@ struct_req = StructuredTextRequest(texts=[Text(content=text_content)]*2, params=
 audio_content = open('test.wav', 'rb').read()
 audio_req = AudioRequest(content=audio_content, params=params, format="LINEAR16")
 
+# Specify your request and response type
 request = text_req
+resp_typs = ['annotations', 'audio', 'classification', 'texts']
 response_type = 'annotations'
 
 
