@@ -115,6 +115,22 @@ class TestELG(unittest.TestCase):
         assert 'response' or 'failure' or 'error' in res
         # print(res)
 
+    def test_large_req_mix(self):
+        """Test stuctured texts which contain mix of large and small text.
+        API service should still work and also return warning on the part of texts that was failed to parse"""
+
+        large_text_content = " ".join([text_content]*100)
+        large_mix_req = StructuredTextRequest(texts=[Text(content=text_content)]*2 + [Text(content=large_text_content)], params=params)
+        res = requests.post(url, headers=headers, json=large_mix_req.dict())
+        assert res is not None
+        assert res.status_code == 200
+        res = res.json()
+        assert 'response' in res 
+        assert res['response']['type'] == 'texts', 'Wrong type returns'
+        warnings = res['response']['warnings']
+        self.assertIsInstance(warnings, list, 'given object is not List type')
+        assert warnings[0]['code'] == 'elg.request.too.large'
+
     def test_inv_param(self):
         inv_req = copy.deepcopy(request)
         if not params: return
