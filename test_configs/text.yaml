@@ -1,7 +1,7 @@
 port: 8080 # Port of the service
 params: # Empty if no params
-content: "Idag släpper KB språkmodeller." # Text content for testing
+text: "Idag släpper KB språkmodeller." # Text content for testing
 request_type: "text" # type of request, select one from 'text', 'structuredtext', 'audio'
-response_type: "text" # type of response, select one from 'annotations', 'audio', 'classification', 'texts'
+response_type: "texts" # type of response, select one from 'annotations', 'audio', 'classification', 'texts'
 trial_num: 2 # For testing the response time
 thread_num: 5 # For testing the response time
