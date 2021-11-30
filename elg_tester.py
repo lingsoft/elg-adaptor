@@ -13,6 +13,13 @@ import unittest
 
 
 def load_request():
+    '''
+    Load configs for testing from a yaml file.
+    The path of the yaml should be set as a environment variable YAML_FILE
+    :return:
+    '''
+
+
     # Configs
     configs = yaml.load(open(os.environ.get('YAML_FILE')), Loader=yaml.FullLoader)
 
@@ -27,7 +34,7 @@ def load_request():
     response_type = configs['response_type']
 
     if request_type == 'text':
-        content = configs['content']
+        content = configs['text']
         request = TextRequest(content=content, params=params)
     elif request_type == 'structuredtext':
         content = configs['content']
@@ -41,9 +48,17 @@ def load_request():
     if response_type not in ['annotations', 'audio', 'classification', 'texts']:
         raise RuntimeError('response_type not support')
 
-    return url, headers, request, params, response_type, content
+    trial_num = configs['trial_num']
+    thread_num = configs['thread_num']
+
+    return url, headers, request, params, response_type, content, trial_num, thread_num
+
 
 def audio_req_files(req):
+    '''
+    Turn the AudioRequest into a file dict for requests
+    :param req: AudioRequest
+    '''
     files = {
         "request": (
             None,
@@ -62,9 +77,12 @@ def audio_req_files(req):
 
 
 class TestELG(unittest.TestCase):
-    url, headers, request, params, response_type, content = load_request()
+    url, headers, request, params, response_type, content, trial_num, thread_num = load_request()
 
     def test_res_type(self):
+        """
+        Validate the response type
+        """
         # for audio input
         if isinstance(self.request, AudioRequest):
             res = requests.post(self.url, headers=self.headers, files=audio_req_files(self.request))
@@ -78,16 +96,23 @@ class TestELG(unittest.TestCase):
         # print(res)
 
     def test_resp_time(self):
+        """
+        Record the response time by averaging over multiple requests
+        """
+        times = self.trial_num
         st = time.time()
-        for i in range(2):
+        for i in range(times):
             if isinstance(self.request, AudioRequest):
                 requests.post(self.url, headers=self.headers, files=audio_req_files(self.request))
             else:
                 requests.post(self.url, headers=self.headers, json=self.request.dict())
         et = time.time()
-        print("Average response time: %.2fs"%((et-st)/10))
+        print("Average response time: %.2fs"%((et-st)/times))
 
     def test_emp_req(self):
+        """
+        Test the service with empty request, it should return empty response or failure or error
+        """
         empty_req = copy.deepcopy(self.request)
         if isinstance(empty_req, TextRequest):
             empty_req.content = ""
@@ -106,6 +131,9 @@ class TestELG(unittest.TestCase):
         # print(res)
 
     def test_lar_req(self):
+        '''
+        Test the service with large request
+        '''
         large_req = copy.deepcopy(self.request)
 
         if isinstance(large_req, TextRequest):
@@ -127,24 +155,30 @@ class TestELG(unittest.TestCase):
         assert 'response' or 'failure' or 'error' in res
         # print(res)
 
-    # def test_large_req_mix(self):
-    #     """Test stuctured texts which contain mix of large and small text.
-    #     API service should still work and also return warning on the part of texts that was failed to parse"""
-    #
-    #     large_text_content = " ".join([text_content]*100)
-    #     large_mix_req = StructuredTextRequest(texts=[Text(content=text_content)]*2 + [Text(content=large_text_content)], params=params)
-    #     res = requests.post(url, headers=headers, json=large_mix_req.dict())
-    #     assert res is not None
-    #     assert res.status_code == 200
-    #     res = res.json()
-    #     assert 'response' in res
-    #     assert res['response']['type'] == 'texts', 'Wrong type returns'
-    #     warnings = res['response']['warnings']
-    #     self.assertIsInstance(warnings, list, 'given object is not List type')
-    #     assert warnings[0]['code'] == 'elg.request.too.large'
+    def test_large_req_mix(self):
+        """Test stuctured texts which contain mix of large and small text.
+        API service should still work and also return warning on the part of texts that was failed to parse"""
+        if isinstance(self.request, AudioRequest) or isinstance(self.request, TextRequest):
+            return
+        large_text_content = " ".join([self.content]*100)
+        large_mix_req = StructuredTextRequest(texts=[Text(content=self.content)]*2 + [Text(content=large_text_content)], params=self.params)
+        res = requests.post(self.url, headers=self.headers, json=large_mix_req.dict())
 
+        assert res is not None
+        assert res.status_code == 200
+        res = res.json()
+        assert 'response' in res
+        assert res['response']['type'] == 'texts', 'Wrong type returns'
+        warnings = res['response']['warnings']
+        self.assertIsInstance(warnings, list, 'given object is not List type')
+        assert warnings[0]['code'] == 'elg.request.too.large'
 
     def test_inv_param(self):
+        '''
+        Test the service with invalid params
+        Failure or error should be returned
+        If no param, this test will be skipped
+        '''
         inv_req = copy.deepcopy(self.request)
         if not self.params: return
         inv_params = copy.deepcopy(self.params)
@@ -162,6 +196,10 @@ class TestELG(unittest.TestCase):
         # print(res)
 
     def test_inv_schema(self):
+        '''
+        Test the service with invalid request schema
+        Failure or error should be returned
+        '''
         if isinstance(self.request, AudioRequest):
             inv_req = copy.deepcopy(self.request)
             request_dict = audio_req_files(inv_req)
@@ -178,6 +216,9 @@ class TestELG(unittest.TestCase):
         # print(res)
 
     def test_load(self):
+        """
+        Load test the service with concurrent requests
+        """
         class ReqThread(threading.Thread):
             def __init__(self, url, headers, data, times, audios=False):
                 super().__init__()
@@ -193,8 +234,8 @@ class TestELG(unittest.TestCase):
                         requests.post(self.url, headers=self.headers, files=self.data)
                     else:
                         requests.post(self.url, headers=self.headers, json=self.data)
-        t_num = 2
-        times = 2
+        t_num = self.thread_num
+        times = self.trial_num
         t_list = []
         for i in range(t_num):
             if isinstance(self.request, AudioRequest):

@@ -3,3 +3,5 @@ params: # Empty if no params
 audio: "test.wav" # path to the audio file
 request_type: "audio" # type of request, select one from 'text', 'structuredtext', 'audio'
 response_type: "annotations" # type of response, select one from 'annotations', 'audio', 'classification', 'texts'
+trial_num: 2 # For testing the response time
+thread_num: 5 # For testing the response time

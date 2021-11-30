@@ -25,9 +25,22 @@ except Exception as err:
 
 ### Test Cases
 
-For test cases, you need to give the configurations and some request parameters.
+To test the ELG service, you can specify some configurations in a yaml file
+```yaml
+port:  # Port of the service
+params: # Empty if no params
+request_type: # type of request, select one from 'text', 'structuredtext', 'audio'
+audio: # path to the audio file, if request_type is audio
+text: # text of the request, if request_type is text or structuredtext
+response_type: # type of response, select one from 'annotations', 'audio', 'classification', 'texts'
+trial_num: # for testing the response time
+thread_num: # for testing the response time
+```
 
-The tester will test text request and structured text request. 
+Set the path to the yaml file as a environment variable
+```shell
+export YAML_FILE=<path-to-yaml>
+```
 
 After starting you elg service, use the following script to run the test
 ```shell
