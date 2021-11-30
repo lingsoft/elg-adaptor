@@ -140,7 +140,7 @@ class TestELG(unittest.TestCase):
             large_text = " ".join([self.content] * 10000)
             large_req.content = large_text
         elif isinstance(large_req, AudioRequest):
-            large_req.content = b"".join([self.content]*1000)
+            large_req.content = b"".join([self.content]*10)
         elif isinstance(large_req, StructuredTextRequest):
             large_text = " ".join([self.content] * 10000)
             large_req.texts=[Text(content=large_text)] * 2

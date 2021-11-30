@@ -1,4 +1,4 @@
-port: 8080 # Port of the service
+port: 8181 # Port of the service
 params: # Empty if no params
 audio: "test.wav" # path to the audio file
 request_type: "audio" # type of request, select one from 'text', 'structuredtext', 'audio'
