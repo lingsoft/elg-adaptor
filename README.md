@@ -38,8 +38,6 @@ trial_num: # for testing the response time
 thread_num: # for testing the response time
 ```
 
-
-
 Set the path to the yaml file as a environment variable
 ```shell
 export YAML_FILE=<path-to-yaml>
