@@ -29,7 +29,7 @@ To test the ELG service, you can specify some configurations in a yaml file.
 There are two samples under the [test_configs](test_configs) folder.
 ```yaml
 port:  # port of the service
-params: # empty if no params
+params: # should be a dict, empty if no params
 request_type: # type of request, select one from 'text', 'structuredtext', 'audio'
 audio: # path to the audio file, if request_type is 'audio'
 text: # text of the request, if request_type is 'text' or 'structuredtext'
