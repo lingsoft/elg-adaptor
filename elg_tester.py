@@ -91,7 +91,7 @@ class TestELG(unittest.TestCase):
         assert res is not None
         assert res.status_code == 200
         res = res.json()
-        assert 'response' in res
+        assert 'response' in res, 'Wrong type returns'
         assert res['response']['type'] == self.response_type
         # print(res)
 

@@ -25,17 +25,20 @@ except Exception as err:
 
 ### Test Cases
 
-To test the ELG service, you can specify some configurations in a yaml file
+To test the ELG service, you can specify some configurations in a yaml file. 
+There are two samples under the [test_configs](test_configs) folder.
 ```yaml
-port:  # Port of the service
-params: # Empty if no params
+port:  # port of the service
+params: # empty if no params
 request_type: # type of request, select one from 'text', 'structuredtext', 'audio'
-audio: # path to the audio file, if request_type is audio
-text: # text of the request, if request_type is text or structuredtext
+audio: # path to the audio file, if request_type is 'audio'
+text: # text of the request, if request_type is 'text' or 'structuredtext'
 response_type: # type of response, select one from 'annotations', 'audio', 'classification', 'texts'
 trial_num: # for testing the response time
 thread_num: # for testing the response time
 ```
+
+
 
 Set the path to the yaml file as a environment variable
 ```shell
