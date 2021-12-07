@@ -44,7 +44,14 @@ export YAML_FILE=<path-to-yaml>
 ```
 
 After starting you elg service, use the following script to run the test
+
+To run all the test cases
 ```shell
 python -m unittest elg_tester.py
+```
+
+To run only one test case, take `test_res_type` as an example.
+```shell
+python -m unittest elg_tester.TestELG.test_res_type
 ```
  

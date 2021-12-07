@@ -1,7 +1,7 @@
 port: 8080
 params:
-text: "Idag släpper KB språkmodeller."
+text: "Minä rakastan sinua!"
 request_type: "text"
-response_type: "texts"
-trial_num: 2
-thread_num: 5
+response_type: "annotations"
+trial_num: 5
+thread_num: 10
