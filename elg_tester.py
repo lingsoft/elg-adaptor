@@ -37,7 +37,7 @@ def load_request():
         content = configs['text']
         request = TextRequest(content=content, params=params)
     elif request_type == 'structuredtext':
-        content = configs['content']
+        content = configs['text']
         request = StructuredTextRequest(texts=[Text(content=content)] * 2, params=params)
     elif request_type == 'audio':
         content = open(configs['audio'], 'rb').read()
