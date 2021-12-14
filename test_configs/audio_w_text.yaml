@@ -1,0 +1,8 @@
+port: 3000
+params:
+audio: "pohjantuuli_ja_aurinko.wav" # for forced aligner
+text: "pohjantuuli_ja_aurinko.txt" # for forced aligner
+request_type: "audio"
+response_type: "annotations"
+trial_num: 2
+thread_num: 5
