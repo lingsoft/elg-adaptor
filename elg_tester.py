@@ -40,7 +40,8 @@ def load_request():
         content = configs['text']
         request = StructuredTextRequest(texts=[Text(content=content)] * 2, params=params)
     elif request_type == 'audio':
-        content = open(configs['audio'], 'rb').read()
+        with open(configs['audio'], 'rb') as f:
+            content = f.read()
         request = AudioRequest(content=content, format='LINEAR16')
     else:
         raise RuntimeError('request_type not support')
@@ -50,24 +51,24 @@ def load_request():
 
     trial_num = configs['trial_num']
     thread_num = configs['thread_num']
+    text = configs.get('text')
 
-    return url, headers, request, params, response_type, content, trial_num, thread_num
+    return url, headers, request, params, response_type, content, text, trial_num, thread_num
 
 
-def audio_req_files(req):
+def audio_req_files(req, text=None):
     '''
     Turn the AudioRequest into a file dict for requests
     :param req: AudioRequest
     '''
+    content = {"type": "audio",  "format": "LINEAR16"}
+    if text is not None:
+        with open(text, 'r') as f:
+            content["features"] = {"transcript": f.read()} 
     files = {
         "request": (
             None,
-            json.dumps(
-                {
-                    "type": "audio",
-                    "format": "LINEAR16",
-                }
-            ),
+            json.dumps(content),
             "application/json",
         ),
         "content": (None, req.content, "audio/x-wav"),
@@ -77,7 +78,7 @@ def audio_req_files(req):
 
 
 class TestELG(unittest.TestCase):
-    url, headers, request, params, response_type, content, trial_num, thread_num = load_request()
+    url, headers, request, params, response_type, content, text, trial_num, thread_num = load_request()
 
     def test_res_type(self):
         """
@@ -85,7 +86,7 @@ class TestELG(unittest.TestCase):
         """
         # for audio input
         if isinstance(self.request, AudioRequest):
-            res = requests.post(self.url, headers=self.headers, files=audio_req_files(self.request))
+            res = requests.post(self.url, headers=self.headers, files=audio_req_files(self.request, self.text))
         else:
             res = requests.post(self.url, headers=self.headers, json=self.request.dict())
         assert res is not None
