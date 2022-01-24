@@ -1,0 +1,8 @@
+port: 8000
+params: {"languageSet":["fin","swe","eng"]}
+# text: [{"content":"Suomi on kaunis mää"}, {"content": "This is an English sentence"}]
+text: "Suomi on kaunis mää"
+request_type: "structuredtext"
+response_type: "classification"
+trial_num: 1
+thread_num: 10

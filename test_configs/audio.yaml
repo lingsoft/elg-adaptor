@@ -4,4 +4,4 @@ audio: "test.wav"
 request_type: "audio"
 response_type: "annotations"
 trial_num: 2
-thread_num: 5
+thread_num: 1

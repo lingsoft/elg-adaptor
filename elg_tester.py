@@ -169,10 +169,11 @@ class TestELG(unittest.TestCase):
         assert res.status_code == 200
         res = res.json()
         assert 'response' in res
-        assert res['response']['type'] == 'texts', 'Wrong type returns'
-        warnings = res['response']['warnings']
-        self.assertIsInstance(warnings, list, 'given object is not List type')
-        assert warnings[0]['code'] == 'elg.request.too.large'
+        self.assertIn(res['response']['type'], ['texts', 'classification'], msg='Wrong type returns')
+        if res['response']['type'] == 'texts': # only tnpp and other annotation tool APIs needs
+            warnings = res['response']['warnings']
+            self.assertIsInstance(warnings, list, 'given object is not List type')
+            assert warnings[0]['code'] == 'elg.request.too.large'
 
     def test_inv_param(self):
         '''
@@ -249,4 +250,4 @@ class TestELG(unittest.TestCase):
         for t in t_list:
             t.join()
         et = time.time()
-        print("Average response time: %.2fs"%((et-st)/(t_num*times)))
+        print("Multithreading: Average response time: %.2fs"%((et-st)/(t_num*times)))

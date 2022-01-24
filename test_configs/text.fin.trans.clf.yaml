@@ -1,0 +1,7 @@
+port: 8181
+params:
+text: "ainii eikä noita"
+request_type: "text"
+response_type: "classification"
+trial_num: 1
+thread_num: 10

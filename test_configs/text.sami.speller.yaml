@@ -1,0 +1,7 @@
+port: 8181
+params:
+text: "Prošeatadoarjagat"
+request_type: "text"
+response_type: "texts"
+trial_num: 1
+thread_num: 10
