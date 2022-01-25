@@ -169,7 +169,7 @@ class TestELG(unittest.TestCase):
         assert res.status_code == 200
         res = res.json()
         assert 'response' in res
-        self.assertIn(res['response']['type'], ['texts', 'classification'], msg='Wrong type returns')
+        self.assertIn(res['response']['type'], ['texts', 'annotations', 'classification'], msg='Wrong type returns')
         if res['response']['type'] == 'texts': # only tnpp and other annotation tool APIs needs
             warnings = res['response']['warnings']
             self.assertIsInstance(warnings, list, 'given object is not List type')
