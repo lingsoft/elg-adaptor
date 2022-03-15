@@ -27,6 +27,8 @@ def load_request():
     # Configuration
     port = configs['port']
     url = 'http://localhost:%d/process' % port
+    if 'finto' in os.environ.get('YAML_FILE').split('.'):
+        url = 'http://localhost:%d/process/yso-en' % port
 
     # Request
     headers = {'Accept': 'application/json'}
@@ -176,6 +178,13 @@ class TestELG(unittest.TestCase):
         assert res.status_code == 200
         res = res.json()
         assert 'response' or 'failure' or 'error' in res
+        # Add test for failure response
+        if 'failure' in res:
+            errors = res['failure']['errors']
+            assert len(errors) >= 1
+            assert errors[0]["code"] == "elg.request.too.large"
+            assert len(errors[0]["params"]) >= 1
+            assert isinstance(errors[0]["params"][0], str)
         # print(res)
 
     def test_large_req_mix(self):
