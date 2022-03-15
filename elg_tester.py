@@ -244,9 +244,12 @@ class TestELG(unittest.TestCase):
         res = res.json()
         assert 'failure' or 'error' in res
         if 'failure' in res:
+            print('response at invalid paramters:\n', res)
             errors = res['failure']['errors']
             assert len(errors) >= 1
-            assert errors[0]["code"] == "elg.service.internalError"
+            assert errors[0]["code"] in [
+                "elg.service.internalError", "elg.request.invalid"
+            ]
             assert len(errors[0]["params"]) >= 1
             assert isinstance(errors[0]["params"][0], str)
 
