@@ -1,0 +1,7 @@
+port: 8000
+params:
+text: "Engelbert tar Volvon till Tele2 Arena för att titta på Djurgården IF som spelar fotboll i VM klockan två på kvällen."
+request_type: "text"
+response_type: "annotations"
+trial_num: 5
+thread_num: 10
