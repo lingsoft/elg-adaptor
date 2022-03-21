@@ -1,4 +1,4 @@
-port: 8181
+port: 8000
 params:
 text: "Maailman suurin verkkokauppakiinteistöjen omistaja, kiinalainen Alibaba, on sijoittanut 590 miljoonaa dollaria älypuhelinvalmistaja Meizuun"
 request_type: "text"

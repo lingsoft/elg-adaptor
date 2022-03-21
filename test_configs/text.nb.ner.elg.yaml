@@ -1,4 +1,4 @@
-port: 8001
+port: 8000
 params:
 text: "Svein Arne Brygfjeld, Freddy Wetjen, Javier de la Rosa og Per E Kummervold jobber alle ved AILABen til Nasjonalbiblioteket. Nasjonalbiblioteket har lokaler både i Mo i Rana og i Oslo."
 request_type: "text"

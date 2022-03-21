@@ -1,7 +1,7 @@
 port: 8000
-params: {"project-id": "yso-en", "threshold": 0.02, "limit": 3}
+params: {"threshold": 0.02, "limit": 3}
 text: "Machine learning (ML) is the study of computer algorithms that can improve automatically through experience and by the use of data.!"
 request_type: "text"
 response_type: "texts"
 trial_num: 1
-thread_num: 1
+thread_num: 5
