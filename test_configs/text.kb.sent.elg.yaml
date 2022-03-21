@@ -1,4 +1,4 @@
-port: 8181
+port: 8000
 params:
 text: "Jag gillar det inte"
 request_type: "text"
