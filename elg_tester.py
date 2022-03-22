@@ -1,4 +1,3 @@
-from distutils.log import error
 import os
 
 from elg.model import TextRequest, StructuredTextRequest, AudioRequest
@@ -70,8 +69,8 @@ def audio_req_files(req, text=None):
     """
     content = {"type": "audio", "format": "LINEAR16"}
     if text is not None:
-        with open(text, 'r') as f:
-            content["features"] = {"transcript": f.read()}
+        content["features"] = {"transcript": text}
+
     files = {
         "request": (
             None,
@@ -161,7 +160,11 @@ class TestELG(unittest.TestCase):
             large_text = " ".join([self.content] * 10000)
             large_req.content = large_text
         elif isinstance(large_req, AudioRequest):
-            large_req.content = b"".join([self.content] * 10)
+            import sys
+            audio_raw = b"x01\x00\x01\x00\x00\x04\x00\x00\x00\x04\x00\x00\x01\x00\x08\x00data\x00\x00\x00\x00"
+            large_req.content = self.content + b"".join([audio_raw] * 1200000)
+            # Make sure audio file is larger than 25MB
+            assert sys.getsizeof(large_req.content) / (1024 * 1024) > 25
         elif isinstance(large_req, StructuredTextRequest):
             large_text = " ".join([self.content] * 10000)
             large_req.texts = [Text(content=large_text)] * 2
@@ -169,7 +172,7 @@ class TestELG(unittest.TestCase):
         if isinstance(self.request, AudioRequest):
             res = requests.post(self.url,
                                 headers=self.headers,
-                                files=audio_req_files(large_req))
+                                files=audio_req_files(large_req, self.text))
         else:
             res = requests.post(self.url,
                                 headers=self.headers,
@@ -183,7 +186,9 @@ class TestELG(unittest.TestCase):
         if 'failure' in res:
             errors = res['failure']['errors']
             assert len(errors) >= 1
-            assert errors[0]["code"] == "elg.request.too.large"
+            assert errors[0]["code"] in [
+                "elg.request.too.large", "elg.upload.too.large"
+            ]
         # print(res)
 
     def test_large_req_mix(self):

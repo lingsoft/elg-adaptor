@@ -1,0 +1,8 @@
+port: 8000
+params:
+audio: "aligner_test/ikkuna.wav" # for forced aligner
+text: "ikkuna" # for forced aligner
+request_type: "audio"
+response_type: "annotations"
+trial_num: 2
+thread_num: 5
