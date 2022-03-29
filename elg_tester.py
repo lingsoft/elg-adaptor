@@ -28,6 +28,8 @@ def load_request():
     url = 'http://localhost:%d/process' % port
     if 'finto' in os.environ.get('YAML_FILE').split('.'):
         url = 'http://localhost:%d/process/yso-en' % port
+    if 'aligner' in os.environ.get('YAML_FILE').split('.'):
+        url = 'http://localhost:%d/process/fi' % port
 
     # Request
     headers = {'Accept': 'application/json'}
@@ -69,7 +71,7 @@ def audio_req_files(req, text=None):
     """
     content = {"type": "audio", "format": "LINEAR16"}
     if text is not None:
-        content["features"] = {"transcript": text}
+        content["params"] = {"transcript": text}
 
     files = {
         "request": (
