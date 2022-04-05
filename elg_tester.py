@@ -70,8 +70,10 @@ def audio_req_files(req, text=None):
     :param req: AudioRequest
     """
     content = {"type": "audio", "format": "LINEAR16"}
-    if text is not None:
-        content["params"] = {"transcript": text}
+
+    if 'aligner' in os.environ.get('YAML_FILE').split('.'):
+        if text is not None:
+            content["params"] = {"transcript": text}
 
     files = {
         "request": (
